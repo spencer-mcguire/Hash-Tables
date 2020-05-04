@@ -87,6 +87,7 @@ class HashTable:
         Implement this.
         """
         self.storage = self.storage * 2
+        
 
 if __name__ == "__main__":
     ht = HashTable(2)
