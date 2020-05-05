@@ -8,6 +8,9 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __str__(self):
+        return f"({self.key}, {self.value})"
+
 
 class HashTable:
     """
@@ -16,6 +19,10 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * capacity
+        self.head = None
 
     def fnv1(self, key):
         """
@@ -30,6 +37,10 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for x in key:
+            hash = ((hash << 5) + hash) + ord(x)
+        return hash & 0xFFFFFFFF
 
     def hash_index(self, key):
         """
@@ -46,7 +57,25 @@ class HashTable:
         Hash collisions should be handled with Linked List Chaining.
 
         Implement this.
+        Find the hash index
+        Search the list for the key
+        If it's there, replace the value
+        If it's not, append a new record to the list
+
         """
+        index = self.hash_index(key)
+
+        # loop the storage to see if the value exists
+        # if it exists replace the value
+        # if not, add a new node
+        if self.storage[index] in self.storage is not None:
+            self.storage[index] = value
+        new_node = HashTableEntry(key, value)
+        new_node.next = self.head
+        self.head = new_node
+
+        return new_node
+            
 
     def delete(self, key):
         """
@@ -55,7 +84,34 @@ class HashTable:
         Print a warning if the key is not found.
 
         Implement this.
+
+        Find the hash index
+        Search the list for the key
+        If found, delete the node from the list, (return the node or value?)
+        Else return None
+
         """
+        
+        current = self.head
+        if current.key == key:
+            self.head = self.head.next
+            current.next = None
+            return current
+
+        prev = None
+
+        while current is not None:
+            if current.key == key:
+                prev.next = current.next
+                current.next = None
+                return current.value
+
+            prev = current
+
+            current = current.next
+
+        return None
+        
 
     def get(self, key):
         """
@@ -64,9 +120,25 @@ class HashTable:
         Returns None if the key is not found.
 
         Implement this.
-        """
 
-    def resize(self):
+        Find the hash index
+        Search the list for the key
+        If  found, return the value
+        Else return None
+
+        """
+        """index = self.hash_index(key)
+        return self.storage[index]"""
+        current = self.head
+        while current is not None:
+            if current.key == key:
+                return current.value
+            
+            current = current.next
+        
+        return None
+
+    def resize(self, new_capacity):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
@@ -90,8 +162,8 @@ if __name__ == "__main__":
 
     # Test resizing
     old_capacity = len(ht.storage)
-    ht.resize()
     new_capacity = len(ht.storage)
+    ht.resize(new_capacity)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
