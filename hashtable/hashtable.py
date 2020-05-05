@@ -91,8 +91,6 @@ class HashTable:
         Else return None
 
         """
-        index = self.hash_index(key)
-        node = self.storage[index]
         
         current = self.head
         if current.key == key:
@@ -140,15 +138,13 @@ class HashTable:
         
         return None
 
-    def resize(self):
+    def resize(self, new_capacity):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
-        self.storage = self.storage * 2
-        
 
 if __name__ == "__main__":
     ht = HashTable(2)
@@ -166,8 +162,8 @@ if __name__ == "__main__":
 
     # Test resizing
     old_capacity = len(ht.storage)
-    ht.resize()
     new_capacity = len(ht.storage)
+    ht.resize(new_capacity)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
