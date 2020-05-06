@@ -22,7 +22,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
-        self.head = None
+        self.key_count = 0
 
     def fnv1(self, key):
         """
@@ -64,18 +64,25 @@ class HashTable:
 
         """
         index = self.hash_index(key)
+        node = self.storage[index]
 
-        # loop the storage to see if the value exists
-        # if it exists replace the value
-        # if not, add a new node
-        if self.storage[index] in self.storage is not None:
-            self.storage[index] = value
-        new_node = HashTableEntry(key, value)
-        new_node.next = self.head
-        self.head = new_node
+        if node is None:
+            self.storage[index] = HashTableEntry(key, value)
+            return
+        
+        prev = node
 
-        return new_node
-            
+        while node is not None:
+            if node.key == key:
+                node.value = value
+                return
+
+            prev = node
+            node = node.next
+
+        prev.next = HashTableEntry(key, value)
+
+
 
     def delete(self, key):
         """
@@ -91,26 +98,21 @@ class HashTable:
         Else return None
 
         """
-        
-        current = self.head
-        if current.key == key:
-            self.head = self.head.next
-            current.next = None
-            return current
-
+        index = self.hash_index(key)
+        node = self.storage[index]
         prev = None
 
-        while current is not None:
-            if current.key == key:
-                prev.next = current.next
-                current.next = None
-                return current.value
+        while node is not None and node.key != key:
+            prev = node
+            node = node.next
 
-            prev = current
-
-            current = current.next
-
-        return None
+        if node is None:
+            print('NOPE')
+        else:
+            if prev is None:
+                self.storage[index] = node.next
+            else:
+                prev.next = prev.next.next
         
 
     def get(self, key):
@@ -127,16 +129,16 @@ class HashTable:
         Else return None
 
         """
-        """index = self.hash_index(key)
-        return self.storage[index]"""
-        current = self.head
-        while current is not None:
-            if current.key == key:
-                return current.value
-            
-            current = current.next
+        index = self.hash_index(key)
+        current = self.storage[index]
+
+        while current is not None and current.key != key:
+           current = current.next
         
-        return None
+        if current is None:
+            return None
+        else:
+            return current.value
 
     def resize(self, new_capacity):
         """
