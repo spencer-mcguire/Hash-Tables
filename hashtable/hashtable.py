@@ -63,11 +63,18 @@ class HashTable:
         If it's not, append a new record to the list
 
         """
+
+        load = self.key_count / self.capacity
+        print('initial load', load)
+        if load > 0.7:
+            print(f'\nresized {load}\n')
+            self.resize(self.capacity * 2)
+        print('=== no resize ===')
         index = self.hash_index(key)
         node = self.storage[index]
-
         if node is None:
             self.storage[index] = HashTableEntry(key, value)
+            self.key_count += 1
             return
         
         prev = node
@@ -81,7 +88,8 @@ class HashTable:
             node = node.next
 
         prev.next = HashTableEntry(key, value)
-
+        self.key_count += 1
+        print('full load', load)
 
 
     def delete(self, key):
@@ -100,19 +108,14 @@ class HashTable:
         """
         index = self.hash_index(key)
         node = self.storage[index]
-        prev = None
 
         while node is not None and node.key != key:
-            prev = node
             node = node.next
 
         if node is None:
-            print('NOPE')
+            return None
         else:
-            if prev is None:
-                self.storage[index] = node.next
-            else:
-                prev.next = prev.next.next
+            node.key = None
         
 
     def get(self, key):
@@ -147,13 +150,26 @@ class HashTable:
 
         Implement this.
         """
+        storage = self.storage
+        self.capacity = new_capacity
+        new_storage = [None] * self.capacity
+        self.storage = new_storage
+
+        for node in storage:
+            while node is not None:
+                self.put(node.key, node.value)
+                node = node.next
 
 if __name__ == "__main__":
     ht = HashTable(2)
 
+    old_capacity = len(ht.storage)
     ht.put("line_1", "Tiny hash table")
+    print('key 1', ht.key_count)
     ht.put("line_2", "Filled beyond capacity")
+    print('key 2', ht.key_count)
     ht.put("line_3", "Linked list saves the day!")
+    print('key 3', ht.key_count)
 
     print("")
 
@@ -163,9 +179,7 @@ if __name__ == "__main__":
     print(ht.get("line_3"))
 
     # Test resizing
-    old_capacity = len(ht.storage)
     new_capacity = len(ht.storage)
-    ht.resize(new_capacity)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
