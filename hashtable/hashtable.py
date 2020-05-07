@@ -22,7 +22,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
-        self.head = None
+        self.key_count = 0
 
     def fnv1(self, key):
         """
@@ -63,19 +63,35 @@ class HashTable:
         If it's not, append a new record to the list
 
         """
+
+        load = self.key_count / self.capacity
+        print('initial load', load)
+        if load > 0.7:
+            print(f'\nresized {load}\n')
+            self.key_count = 0
+            self.resize(self.capacity * 2)
+        print('=== no resize ===')
         index = self.hash_index(key)
+        node = self.storage[index]
+        if node is None:
+            self.storage[index] = HashTableEntry(key, value)
+            self.key_count += 1
+            return
+        
+        prev = node
 
-        # loop the storage to see if the value exists
-        # if it exists replace the value
-        # if not, add a new node
-        if self.storage[index] in self.storage is not None:
-            self.storage[index] = value
-        new_node = HashTableEntry(key, value)
-        new_node.next = self.head
-        self.head = new_node
+        while node is not None:
+            if node.key == key:
+                node.value = value
+                return
 
-        return new_node
-            
+            prev = node
+            node = node.next
+
+        prev.next = HashTableEntry(key, value)
+        self.key_count += 1
+        print('full load', load)
+
 
     def delete(self, key):
         """
@@ -91,26 +107,16 @@ class HashTable:
         Else return None
 
         """
-        
-        current = self.head
-        if current.key == key:
-            self.head = self.head.next
-            current.next = None
-            return current
+        index = self.hash_index(key)
+        node = self.storage[index]
 
-        prev = None
+        while node is not None and node.key != key:
+            node = node.next
 
-        while current is not None:
-            if current.key == key:
-                prev.next = current.next
-                current.next = None
-                return current.value
-
-            prev = current
-
-            current = current.next
-
-        return None
+        if node is None:
+            return None
+        else:
+            node.key = None
         
 
     def get(self, key):
@@ -127,16 +133,16 @@ class HashTable:
         Else return None
 
         """
-        """index = self.hash_index(key)
-        return self.storage[index]"""
-        current = self.head
-        while current is not None:
-            if current.key == key:
-                return current.value
-            
-            current = current.next
+        index = self.hash_index(key)
+        current = self.storage[index]
+
+        while current is not None and current.key != key:
+           current = current.next
         
-        return None
+        if current is None:
+            return None
+        else:
+            return current.value
 
     def resize(self, new_capacity):
         """
@@ -145,13 +151,26 @@ class HashTable:
 
         Implement this.
         """
+        storage = self.storage
+        self.capacity = new_capacity
+        new_storage = [None] * self.capacity
+        self.storage = new_storage
+
+        for node in storage:
+            while node is not None:
+                self.put(node.key, node.value)
+                node = node.next
 
 if __name__ == "__main__":
     ht = HashTable(2)
 
+    old_capacity = len(ht.storage)
     ht.put("line_1", "Tiny hash table")
+    print('key 1', ht.key_count)
     ht.put("line_2", "Filled beyond capacity")
+    print('key 2', ht.key_count)
     ht.put("line_3", "Linked list saves the day!")
+    print('key 3', ht.key_count)
 
     print("")
 
@@ -161,9 +180,7 @@ if __name__ == "__main__":
     print(ht.get("line_3"))
 
     # Test resizing
-    old_capacity = len(ht.storage)
     new_capacity = len(ht.storage)
-    ht.resize(new_capacity)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
