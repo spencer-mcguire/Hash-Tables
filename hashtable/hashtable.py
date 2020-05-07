@@ -68,6 +68,7 @@ class HashTable:
         print('initial load', load)
         if load > 0.7:
             print(f'\nresized {load}\n')
+            self.key_count = 0
             self.resize(self.capacity * 2)
         print('=== no resize ===')
         index = self.hash_index(key)
