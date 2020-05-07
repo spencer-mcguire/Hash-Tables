@@ -13,9 +13,13 @@ def word_count(s):
     # split the string down to elements in a list
     new_words = []
     split = s.lower().split()
-
+    print(split)
     for word in split:
         new_words.append(word.replace(':','').replace(';','').replace(',','').replace('.','').replace('-','').replace('+','').replace('=','').replace('/','').replace('|','').replace('[','').replace(']','').replace('{','').replace('}','').replace('(','').replace(')','').replace('*','').replace('^','').replace('&','').replace('"','').replace('\\',''))
+    print(new_words)
+
+    if new_words == ['']:
+        return word_dic
 
     for w in new_words:
         word_dic[w] = new_words.count(w)
